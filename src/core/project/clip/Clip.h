@@ -125,6 +125,9 @@ struct Clip
     bool reverse = false; // play source range backward; speed still applies as magnitude
     bool flipH = false;
     bool flipV = false;
+    // Resample this clip's pixels with nearest-neighbour instead of bilinear/trilinear filtering
+    // wherever the compositor scales it onto the canvas, so pixel art stays crisp at any size.
+    bool pixelated = false;
     // Meaningful on a Mask-kind adjustment clip and nowhere else — a media clip's masks live on
     // the adjustments pinned to it, which is what makes them timed, stackable and visible on the
     // timeline. Reach them through drift::laneMasksAt / setLinkedMask, never through this.

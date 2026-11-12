@@ -348,6 +348,8 @@ QJsonObject clipToJson(const Clip &clip)
         json.insert(QStringLiteral("layer3d"), true);
     if (clip.depthOcclude)
         json.insert(QStringLiteral("depthOcclude"), true);
+    if (clip.pixelated)
+        json.insert(QStringLiteral("pixelated"), true);
     if (clip.aimAtTarget)
         json.insert(QStringLiteral("aimAtTarget"), true);
     if (!clip.rotationX.isEmpty())
@@ -505,6 +507,7 @@ Clip clipFromJsonV2(const QJsonObject &object, int canvasW = 1920, int canvasH =
     clip.depthOcclude =
         clip.layer3d && object.value(QStringLiteral("depthOcclude")).toBool(false);
     clip.aimAtTarget = object.value(QStringLiteral("aimAtTarget")).toBool(false);
+    clip.pixelated = object.value(QStringLiteral("pixelated")).toBool(false);
     clip.rotationCorrection = object.value(QStringLiteral("rotationCorrection")).toInt(0);
     clip.effects = effectsFromJson(object.value(QStringLiteral("effects")).toArray());
     clip.audioEffects = effectsFromJson(object.value(QStringLiteral("audioEffects")).toArray());

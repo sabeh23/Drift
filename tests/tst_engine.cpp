@@ -250,6 +250,7 @@ private slots:
     void sceneCameraRendersThroughTheCompositor();
     void sceneCameraClipDrivesTheWholeTimeline();
     void depthOcclusionOverridesTrackOrderWhenOptedIn();
+    void pixelatedLayerScalesWithoutSmoothing();
     void trackParamResolvesItsSourceClip();
     void audioWindowOfSilenceIsFlat();
     void audioWindowSineLandsInItsLogBin();
@@ -1903,6 +1904,59 @@ void EngineTest::sceneCameraClipDrivesTheWholeTimeline()
     // is what makes two clips in a row read as a cut.
     const QImage afterEnd = compositor.compositeAt(drift::secondsToUs(5.0));
     QVERIFY(!afterEnd.isNull());
+}
+
+// The Transform panel's "Pixelated" switch: an upscaled layer is sampled nearest-neighbour, so a
+// 2x2 checker blown up to the canvas keeps four flat, hard-edged squares. With the switch off the
+// same draw is bilinear and the seams between squares blend.
+void EngineTest::pixelatedLayerScalesWithoutSmoothing()
+{
+    if (!GpuCompositor::isAvailable())
+        QSKIP("OpenGL offscreen context unavailable");
+
+    QImage checker(2, 2, QImage::Format_RGBA8888);
+    checker.setPixelColor(0, 0, QColor(255, 255, 255));
+    checker.setPixelColor(1, 1, QColor(255, 255, 255));
+    checker.setPixelColor(1, 0, QColor(0, 0, 0));
+    checker.setPixelColor(0, 1, QColor(0, 0, 0));
+
+    const auto render = [&](bool pixelated) {
+        GpuLayer layer;
+        layer.source = checker;
+        layer.rect = QRectF(0, 0, 200, 200);
+        layer.pixelated = pixelated;
+        layer.valid = true;
+        GpuItem item;
+        item.layer = layer;
+        GpuScene scene;
+        scene.canvasSize = QSize(200, 200);
+        scene.backgroundColor = Qt::black;
+        scene.items.append(item);
+        return GpuCompositor::render(scene).convertToFormat(QImage::Format_RGBA8888);
+    };
+    // Grey levels that are neither the black nor the white source texel.
+    const auto blendedPixels = [](const QImage &img) {
+        int blended = 0;
+        for (int y = 0; y < img.height(); ++y)
+            for (int x = 0; x < img.width(); ++x) {
+                const int r = img.pixelColor(x, y).red();
+                if (r > 8 && r < 247)
+                    ++blended;
+            }
+        return blended;
+    };
+
+    const QImage crisp = render(true);
+    QVERIFY(!crisp.isNull());
+    QCOMPARE(blendedPixels(crisp), 0);
+    // Each quadrant is one flat colour right up to the seam.
+    QCOMPARE(crisp.pixelColor(99, 99).red(), 255);
+    QCOMPARE(crisp.pixelColor(100, 99).red(), 0);
+    QCOMPARE(crisp.pixelColor(99, 100).red(), 0);
+    QCOMPARE(crisp.pixelColor(100, 100).red(), 255);
+
+    // The default path is still smoothed, so the switch is what changed the result.
+    QVERIFY(blendedPixels(render(false)) > 1000);
 }
 
 // Per-clip opt-in depth occlusion: a clip that asks for it is covered by whatever is nearer the

@@ -1181,6 +1181,8 @@ public:
     Q_INVOKABLE void cancelReverseRender();
     Q_INVOKABLE bool clipHasReverseProxy(int trackIndex, int clipIndex) const;
     Q_INVOKABLE void setClipFlip(int trackIndex, int clipIndex, bool flipH, bool flipV);
+    // Nearest-neighbour scaling for this clip (keeps pixel art crisp). Visual clips only.
+    Q_INVOKABLE void setClipPixelated(int trackIndex, int clipIndex, bool enabled);
     // Per-clip "3D layer" switch: the tilt/depth/perspective values render (and get grips) only
     // while it is on. Off keeps the values.
     Q_INVOKABLE void setClipLayer3d(int trackIndex, int clipIndex, bool enabled);

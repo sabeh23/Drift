@@ -89,6 +89,7 @@ private slots:
     void keyframeNearestQuery();
     void sourceFramingRoundTrip();
     void clipPose3dRoundTrip();
+    void clipPixelatedRoundTrip();
     void projectSerializationRoundTrip();
     void binFolderSerializationRoundTrip();
     void compositeSequenceRoundTrip();
@@ -661,6 +662,22 @@ void CoreTest::sourceFramingRoundTrip()
     QVERIFY(!QJsonDocument(plain.toJson()).toJson().contains("sourceFrame"));
     QCOMPARE(drift::sourceFrameFromJson({}), QRectF(0, 0, 1, 1));
     QCOMPARE(drift::normalizedSourceFrame(-1, 4, 2, 0.5), QRectF(0, 0.5, 1, 0.5));
+}
+
+void CoreTest::clipPixelatedRoundTrip()
+{
+    drift::Project project;
+    drift::Clip clip;
+    clip.type = drift::ClipType::Image;
+    clip.pixelated = true;
+    project.tracks()[0].clips.append(clip);
+    QVERIFY(drift::Project::fromJson(project.toJson()).tracks()[0].clips[0].pixelated);
+
+    // Off is the default and is not written, so existing projects load and save unchanged.
+    drift::Project plain;
+    plain.tracks()[0].clips.append(drift::Clip{});
+    QVERIFY(!QJsonDocument(plain.toJson()).toJson().contains("pixelated"));
+    QVERIFY(!drift::Project::fromJson(plain.toJson()).tracks()[0].clips[0].pixelated);
 }
 
 void CoreTest::clipPose3dRoundTrip()

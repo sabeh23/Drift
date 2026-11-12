@@ -28,6 +28,7 @@ QString fieldName(const QString &key)
         {QStringLiteral("rotation"), QStringLiteral("transform")},
         {QStringLiteral("flipH"), QStringLiteral("transform")},
         {QStringLiteral("flipV"), QStringLiteral("transform")},
+        {QStringLiteral("pixelated"), QStringLiteral("transform")},
         {QStringLiteral("rotationX"), QStringLiteral("transform")},
         {QStringLiteral("rotationY"), QStringLiteral("transform")},
         {QStringLiteral("z"), QStringLiteral("transform")},

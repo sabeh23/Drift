@@ -1873,6 +1873,19 @@ void AppController::setClipDepthOcclude(int trackIndex, int clipIndex, bool enab
     finishEdit(enabled ? tr("Clip is occluded by depth") : tr("Clip uses track order"));
 }
 
+void AppController::setClipPixelated(int trackIndex, int clipIndex, bool enabled)
+{
+    if (!isValidClipIndex(trackIndex, clipIndex))
+        return;
+    drift::Clip &clip = m_project.tracks()[trackIndex].clips[clipIndex];
+    if (clip.type == drift::ClipType::Audio || clip.pixelated == enabled)
+        return;
+    const drift::Project before = m_project;
+    clip.pixelated = enabled;
+    pushProjectEdit(before, enabled ? tr("Enable pixelated scaling") : tr("Disable pixelated scaling"));
+    finishEdit(enabled ? tr("Clip scales without smoothing") : tr("Clip scales smoothly"));
+}
+
 void AppController::setClipFlip(int trackIndex, int clipIndex, bool flipH, bool flipV)
 {
     if (trackIndex < 0 || trackIndex >= m_project.tracks().size())

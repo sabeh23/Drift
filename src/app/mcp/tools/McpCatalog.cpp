@@ -935,6 +935,7 @@ const QList<Op> &ops()
                                    {QStringLiteral("rotation"), numberProp(QStringLiteral("Degrees clockwise"))},
                                    {QStringLiteral("layer3d"), boolProp(QStringLiteral("Make the clip a 3D layer (true) or flat (false). Writing any of the 3D fields below turns it on; false resets them to 0 and the default perspective"))},
                                    {QStringLiteral("depth_occlude"), boolProp(QStringLiteral("Occlude by depth: this 3D layer hides and is hidden by other depth-occluding 3D layers (model and procedural clips) by z instead of track order. Needs a 3D layer with blend mode Normal; set it on every clip that should sort"))},
+                                   {QStringLiteral("pixelated"), boolProp(QStringLiteral("Scale the clip with nearest-neighbour sampling instead of smoothing (crisp pixel art). Not keyframed"))},
                                    {QStringLiteral("rotationX"), numberProp(QStringLiteral("Rotation about X in degrees (right-handed; + tips the top edge toward the viewer)"))},
                                    {QStringLiteral("rotationY"), numberProp(QStringLiteral("Rotation about Y in degrees (right-handed; + swings the right edge toward the viewer)"))},
                                    {QStringLiteral("z"), numberProp(QStringLiteral("Position Z in pixels; + away from the viewer, - toward it (After Effects' convention)"))},

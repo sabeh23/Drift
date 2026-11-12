@@ -628,6 +628,27 @@ Item {
                 }
             }
 
+            ThemedSwitch {
+                visible: root.clipKind === "video" || root.clipKind === "image"
+                text: qsTr("Pixelated (no smoothing)")
+                tooltip: qsTr("Scale this clip with nearest-neighbour sampling instead of smoothing, so pixel art keeps hard, crisp pixels at any size.")
+                SearchAnchor {
+                    searchId: "transform-pixelated"
+                    title: qsTr("Pixelated (no smoothing)")
+                    keywords: "pixel art nearest neighbor neighbour antialiasing blurry crisp sharp filtering interpolation"
+                }
+                // A Binding rather than a plain one: the click itself assigns `checked`, which
+                // would otherwise sever it and leave the switch stale on the next clip.
+                Binding on checked {
+                    value: {
+                        void root.clipDataRevision
+                        return !!root.clipData.pixelated
+                    }
+                }
+                onToggled: EditorState.setClipPixelated(EditorState.selectedTrack,
+                                                        EditorState.selectedClip, checked)
+            }
+
             ShapeCropSection {
                 visible: root.clipKind === "video" || root.clipKind === "image"
                 width: parent.width

@@ -920,6 +920,7 @@ QVariantMap AppController::clipToMap(const drift::Clip &clip, const drift::Clip 
         {QStringLiteral("depthOcclude"), clip.depthOcclude},
         {QStringLiteral("aimAtTarget"), clip.aimAtTarget},
         {QStringLiteral("flipV"), clip.flipV},
+        {QStringLiteral("pixelated"), clip.pixelated},
         // Discrete lossless orientation fix, distinct from the free "rotation" keyframe track
         // below. "orientation" is the absolute result (what the inspector shows), the correction
         // is what is stored — see drift::Clip::rotationCorrection.

@@ -541,6 +541,8 @@ QVariantMap McpController::compactClip(int trackIndex, int clipIndex, bool inclu
                m_app->propertyValueAt(trackIndex, clipIndex, QStringLiteral("rotation"), at, 0));
     out.insert(QStringLiteral("opacity"),
                m_app->propertyValueAt(trackIndex, clipIndex, QStringLiteral("opacity"), at, 1));
+    if (clip.pixelated)
+        out.insert(QStringLiteral("pixelated"), true);
     if (clip.layer3d) {
         out.insert(QStringLiteral("layer3d"), true);
         if (clip.depthOcclude)
@@ -1032,6 +1034,11 @@ bool McpController::setClipCanvas(int trackIndex, int clipIndex, const QVariantM
         const bool enable = patch.value(QStringLiteral("depthOcclude")).toBool();
         any = any || clip.depthOcclude != enable;
         clip.depthOcclude = enable && clip.layer3d;
+    }
+    if (patch.contains(QStringLiteral("pixelated"))) {
+        const bool enable = patch.value(QStringLiteral("pixelated")).toBool();
+        any = any || clip.pixelated != enable;
+        clip.pixelated = enable;
     }
     if (!any)
         return false;

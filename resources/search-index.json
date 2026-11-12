@@ -955,6 +955,16 @@
       ]
     },
     {
+      "id": "transform-pixelated",
+      "target": "panel:properties.transform#transform-pixelated",
+      "context": "TransformInspector",
+      "source": "Pixelated (no smoothing)",
+      "keywords": "pixel art nearest neighbor neighbour antialiasing blurry crisp sharp filtering interpolation",
+      "needs": [
+        "transformable"
+      ]
+    },
+    {
       "id": "transform-reset-size",
       "target": "panel:properties.transform#transform-reset-size",
       "context": "TransformInspector",

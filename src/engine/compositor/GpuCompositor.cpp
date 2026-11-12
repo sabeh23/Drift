@@ -1429,8 +1429,11 @@ void drawLayerOnCanvas(GlRuntime &rt, QOpenGLExtraFunctions *gl, GlTarget &canva
     // Only worth it when the quad is actually smaller than the texture; at ~1:1 the
     // single bilinear tap is already exact and the copy would be pure cost.
     const QSizeF drawnSize = drawnLayerSize(layer, canvasSize);
-    const bool minifies = layerTarget.width > drawnSize.width() * 1.05
-                          || layerTarget.height > drawnSize.height() * 1.05;
+    // A pixelated clip skips the mip chain too: averaging texels is exactly the smoothing it opts
+    // out of, and nearest minification is what pixel art expects.
+    const bool minifies = !layer.pixelated
+                          && (layerTarget.width > drawnSize.width() * 1.05
+                              || layerTarget.height > drawnSize.height() * 1.05);
     GlTarget mipTarget = minifies ? mipmappedLayerCopy(rt, gl, layerTarget) : GlTarget{};
     const GLuint layerTex = mipTarget.isValid() ? mipTarget.texture() : layerTarget.texture();
     const float layerPremul = mipTarget.isValid() || layerTarget.premultiplied ? 1.f : 0.f;
@@ -1439,8 +1442,28 @@ void drawLayerOnCanvas(GlRuntime &rt, QOpenGLExtraFunctions *gl, GlTarget &canva
     // previous mip chain would otherwise decide how this layer is resampled.
     gl->glBindTexture(GL_TEXTURE_2D, layerTex);
     gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                        mipTarget.isValid() ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                        layer.pixelated       ? GL_NEAREST
+                        : mipTarget.isValid() ? GL_LINEAR_MIPMAP_LINEAR
+                                              : GL_LINEAR);
+    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                        layer.pixelated ? GL_NEAREST : GL_LINEAR);
+
+    // The layer target may be a pooled or cached texture other passes sample without setting a
+    // filter first; hand it back on the default so NEAREST never leaks into them.
+    struct NearestGuard
+    {
+        QOpenGLExtraFunctions *gl;
+        GLuint texture;
+        bool active;
+        ~NearestGuard()
+        {
+            if (!active)
+                return;
+            gl->glBindTexture(GL_TEXTURE_2D, texture);
+            gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
+    } nearestGuard{gl, layerTex, layer.pixelated};
 
     // Targets are pooled by size: hand this one back with the default filter or the next
     // user would sample the mip levels this frame left behind.

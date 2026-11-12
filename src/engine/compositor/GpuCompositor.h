@@ -104,6 +104,9 @@ struct GpuLayer
     drift::ClipPose3d pose3d; // tilt and depth on top of rect/rotation, in canvas pixels
     bool flipH = false;
     bool flipV = false;
+    // Sample the layer with GL_NEAREST (no mip chain) when it is placed on the canvas: the clip's
+    // "Pixelated" switch, for pixel art that must not be smoothed when scaled.
+    bool pixelated = false;
     // Transform layers over this clip's track, in canvas pixels; see drift::transformParentsAt.
     QTransform parent;
     bool hasParent = false;
