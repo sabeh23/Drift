@@ -131,7 +131,7 @@
       "identifier": "ditherAlpha",
       "displayName": "Dither transparency",
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": 1,
       "group": "Dither"
     },
     {
