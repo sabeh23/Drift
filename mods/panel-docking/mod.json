@@ -1,0 +1,6 @@
+{
+  "name": "Panel docking",
+  "description": "Drag the small grip at the top of any panel onto another panel: drop on an edge to dock beside it, or on the middle to add it as a tab.",
+  "author": "Claude",
+  "version": "1.0"
+}

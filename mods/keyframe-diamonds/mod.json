@@ -1,0 +1,6 @@
+{
+  "name": "Keyframe diamonds",
+  "description": "Shows a diamond on each timeline clip wherever it has a keyframe. Click one to jump the playhead there.",
+  "author": "Claude",
+  "version": "1.0"
+}
