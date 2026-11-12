@@ -217,7 +217,10 @@ QMap<QString, QVariant> dramaticDefaults(const EffectPresetEntry &def)
         params.insert(QStringLiteral("saturation"), 2.0);
     else if (def.meta.id == QLatin1String("rgb_split"))
         params.insert(QStringLiteral("amount"), 12.0);
-    else if (def.meta.id == QLatin1String("stylize.pixelate")) {
+    else if (def.meta.id == QLatin1String("stylize.dither")) {
+        params.insert(QStringLiteral("palette"), 4.0); // PICO-8
+        params.insert(QStringLiteral("pixelSize"), 2.0);
+    } else if (def.meta.id == QLatin1String("stylize.pixelate")) {
         params.insert(QStringLiteral("width"), 24.0);
         params.insert(QStringLiteral("height"), 24.0);
     } else if (def.meta.id == QLatin1String("key.chroma")) {

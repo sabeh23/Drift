@@ -1498,6 +1498,30 @@ public:
     Q_INVOKABLE QString saveEasingPreset(const QString &label, const QVariantMap &spec);
     Q_INVOKABLE bool renameEasingPreset(const QString &id, const QString &label);
     Q_INVOKABLE bool deleteEasingPreset(const QString &id);
+
+    // Keyframe presets: a clip's animation saved to the user's library (not the project), so it
+    // can be applied to any clip in any project.
+    //
+    // keyframePresets(): [{id, label, clipKind, duration (s), keyCount, properties: [labels]}]
+    Q_INVOKABLE QVariantList keyframePresets() const;
+    // What saveKeyframePreset can capture from a clip: [{prop, label, keyCount}], one per animated
+    // property, in the keyframe strip's order.
+    Q_INVOKABLE QVariantList keyframePresetCandidates(int trackIndex, int clipIndex) const;
+    // Saves the given animated properties (all of them when `props` is empty) under `label`.
+    // Returns the new preset's id, or "" when there was nothing to save.
+    Q_INVOKABLE QString saveKeyframePreset(int trackIndex, int clipIndex, const QString &label,
+                                           const QStringList &props = {});
+    // Applies a preset to a clip as one undo step, its first key landing at `atSeconds` (timeline
+    // time; clamped into the clip, so the clip's start when the playhead is outside it). Keys
+    // already on those properties inside the span are replaced. With `fitToClip`, position, size,
+    // depth and rotation are mapped from the clip the preset was saved on to this one (a move
+    // saved on a full-frame clip moves a small sticker by the same proportion, starting from
+    // where the sticker is); otherwise values are used as saved, scaled only for a different
+    // canvas size. Effects the preset animates are added when the clip lacks them.
+    Q_INVOKABLE bool applyKeyframePreset(int trackIndex, int clipIndex, const QString &presetId,
+                                         bool fitToClip, double atSeconds);
+    Q_INVOKABLE bool renameKeyframePreset(const QString &id, const QString &label);
+    Q_INVOKABLE bool deleteKeyframePreset(const QString &id);
     Q_INVOKABLE void copyEasingToClipboard(const QVariantMap &spec) const;
     Q_INVOKABLE QVariantMap easingFromClipboard() const;
     Q_INVOKABLE void resetClipTransform(int trackIndex, int clipIndex);
@@ -1863,6 +1887,7 @@ public:
 signals:
     void userTextAnimationPresetsChanged();
     void easingPresetsChanged();
+    void keyframePresetsChanged();
 
     // A text clip was added with no text; the preview should open its inline
     // editor so the user can type straight onto the canvas.

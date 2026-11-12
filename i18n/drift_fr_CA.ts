@@ -2499,6 +2499,73 @@
         <source>Letter and word animations live in the Text tab, under Animate. This moves the whole clip.</source>
         <translation>Les animations de lettres et de mots se trouvent dans l&apos;onglet Texte, sous Animer. Ceci déplace le clip entier.</translation>
     </message>
+    <message>
+        <source>Keyframe presets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save this clip&apos;s keyframes, then apply them to any clip in any project. A preset starts at the playhead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save keyframes as preset…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>My animation %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This clip has no keyframes to save yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit to this clip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On: move and size relative to where this clip already is, scaled to its size. Off: use the exact values the preset was saved with.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n propert(ies)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>%1 s</source>
+        <translation type="unfinished">%1 s</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="unfinished">Appliquer</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished">Plus</translation>
+    </message>
+    <message>
+        <source>Rename…</source>
+        <translation type="unfinished">Renommer…</translation>
+    </message>
+    <message>
+        <source>Rename keyframe preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished">Supprimer</translation>
+    </message>
+    <message>
+        <source>Delete keyframe preset?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>“%1” will be removed from every project. Keyframes already applied to clips stay.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AppController</name>
@@ -4941,6 +5008,109 @@
     </message>
     <message>
         <source>Clip labelled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Position X</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Position Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation type="unfinished">Largeur</translation>
+    </message>
+    <message>
+        <source>Height</source>
+        <translation type="unfinished">Hauteur</translation>
+    </message>
+    <message>
+        <source>Rotation</source>
+        <translation type="unfinished">Rotation</translation>
+    </message>
+    <message>
+        <source>Rotation X</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rotation Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Depth</source>
+        <translation type="unfinished">Profondeur</translation>
+    </message>
+    <message>
+        <source>Perspective</source>
+        <translation type="unfinished">Perspective</translation>
+    </message>
+    <message>
+        <source>Anchor X</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Anchor Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Anchor Z</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation type="unfinished">Opacité</translation>
+    </message>
+    <message>
+        <source>Volume</source>
+        <translation type="unfinished">Volume</translation>
+    </message>
+    <message>
+        <source>Mask · %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Give the keyframe preset a name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This clip has no keyframes to save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not save the keyframe preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Saved keyframe preset “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>That keyframe preset no longer exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nothing in “%1” applies to this clip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Apply keyframe preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Applied “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source> — %n key(s) past the clip&apos;s end left out</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source> — some properties don&apos;t apply to this clip</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -11108,6 +11278,40 @@
     <message>
         <source>Edit keyframe curve</source>
         <translation>Modifier la courbe des images clés</translation>
+    </message>
+</context>
+<context>
+    <name>KeyframePresetSaveDialog</name>
+    <message>
+        <source>Save keyframes as preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation type="unfinished">Enregistrer</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Nom</translation>
+    </message>
+    <message>
+        <source>My animation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keyframes to include</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This clip has no keyframes yet. Add some with the ◇ buttons next to a property, then save them here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%1 (%n key(s))</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>

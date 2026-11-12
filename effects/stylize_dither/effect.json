@@ -1,0 +1,148 @@
+{
+  "id": "stylize.dither",
+  "displayName": "Dither",
+  "category": "retro",
+  "thumbnail": "thumbnail.webp",
+  "order": 310,
+  "backend": "gpu",
+  "parameters": [
+    {
+      "identifier": "pattern",
+      "displayName": "Pattern",
+      "type": "choice",
+      "options": [
+        "Bayer 2×2",
+        "Bayer 4×4",
+        "Bayer 8×8",
+        "Noise",
+        "Lines",
+        "None (posterize)"
+      ],
+      "defaultValue": 1,
+      "group": "Dither"
+    },
+    {
+      "identifier": "palette",
+      "displayName": "Palette",
+      "type": "choice",
+      "options": [
+        "Colour levels",
+        "Greyscale levels",
+        "Two colours",
+        "Game Boy",
+        "PICO-8",
+        "CGA"
+      ],
+      "defaultValue": 0,
+      "group": "Dither"
+    },
+    {
+      "identifier": "levels",
+      "displayName": "Levels",
+      "type": "int",
+      "minValue": 2,
+      "maxValue": 16,
+      "defaultValue": 4,
+      "group": "Dither"
+    },
+    {
+      "identifier": "pixelSize",
+      "displayName": "Pixel size",
+      "type": "int",
+      "minValue": 1,
+      "maxValue": 32,
+      "defaultValue": 1,
+      "group": "Dither"
+    },
+    {
+      "identifier": "spread",
+      "displayName": "Spread",
+      "type": "float",
+      "minValue": 0,
+      "maxValue": 2,
+      "defaultValue": 1,
+      "group": "Dither"
+    },
+    {
+      "identifier": "strength",
+      "displayName": "Strength",
+      "type": "float",
+      "minValue": 0,
+      "maxValue": 1,
+      "defaultValue": 1,
+      "group": "Dither"
+    },
+    {
+      "identifier": "darkColor",
+      "displayName": "Dark colour",
+      "type": "color",
+      "defaultValue": "#000000",
+      "group": "Two colours",
+      "swatches": [
+        "#000000",
+        "#1a1c2c",
+        "#0f380f",
+        "#2b0f54",
+        "#3d2c1e",
+        "#14213d"
+      ]
+    },
+    {
+      "identifier": "lightColor",
+      "displayName": "Light colour",
+      "type": "color",
+      "defaultValue": "#ffffff",
+      "group": "Two colours",
+      "swatches": [
+        "#ffffff",
+        "#f4f4f4",
+        "#9bbc0f",
+        "#ff6c11",
+        "#f2d3ab",
+        "#fca311"
+      ]
+    },
+    {
+      "identifier": "brightness",
+      "displayName": "Brightness",
+      "type": "float",
+      "minValue": -1,
+      "maxValue": 1,
+      "defaultValue": 0,
+      "group": "Tone"
+    },
+    {
+      "identifier": "contrast",
+      "displayName": "Contrast",
+      "type": "float",
+      "minValue": 0,
+      "maxValue": 3,
+      "defaultValue": 1,
+      "group": "Tone"
+    },
+    {
+      "identifier": "animated",
+      "displayName": "Animate noise",
+      "type": "bool",
+      "defaultValue": false,
+      "group": "Tone"
+    }
+  ],
+  "pipeline": {
+    "intermediateBuffers": [],
+    "passes": [
+      {
+        "passIndex": 0,
+        "fragmentShader": "main.frag",
+        "inputs": [
+          {
+            "type": "source_texture"
+          }
+        ],
+        "output": {
+          "type": "canvas"
+        }
+      }
+    ]
+  }
+}

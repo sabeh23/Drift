@@ -572,6 +572,8 @@ add_library(driftcore STATIC
     src/core/animation/Easing.cpp
     src/core/animation/EasingPresetStore.h
     src/core/animation/EasingPresetStore.cpp
+    src/core/animation/KeyframePresetStore.h
+    src/core/animation/KeyframePresetStore.cpp
     src/core/animation/ClipAnimation.h
     src/core/animation/ClipAnimation.cpp
     src/core/project/SubtitleCue.h
@@ -1250,6 +1252,7 @@ target_sources(driftapp PRIVATE
     src/app/editor/appcontroller/AppControllerComposite.cpp
     src/app/editor/appcontroller/AppControllerVector.cpp
     src/app/editor/appcontroller/AppControllerKeyframes.cpp
+    src/app/editor/appcontroller/AppControllerKeyframePresets.cpp
     src/app/editor/appcontroller/AppControllerEffects.cpp
     src/app/editor/appcontroller/AppControllerTracks.cpp
     src/app/editor/appcontroller/AppControllerProject.cpp
@@ -2226,6 +2229,7 @@ qt_add_qml_module(drift
         src/qml/components/TextStylePackThumb.qml
         src/qml/components/TextStylePackPicker.qml
         src/qml/components/dialogs/NameDialog.qml
+        src/qml/components/dialogs/KeyframePresetSaveDialog.qml
         src/qml/components/EmojiPicker.qml
         src/qml/components/controls/ThemedButton.qml
         src/qml/components/controls/ThemedChip.qml

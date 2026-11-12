@@ -40,6 +40,22 @@ Item {
                : { kind: "none", duration: 0.5, curve: "smooth" }
     }
 
+    // Keyframe presets: the user's library, shared by every project.
+    property int presetRevision: 0
+    readonly property var keyframePresets: {
+        void root.presetRevision
+        return EditorState.keyframePresets()
+    }
+    readonly property int animatedCount: {
+        void root.clipDataRevision
+        return root.hasSelection
+               ? EditorState.clipAnimatedProperties(EditorState.selectedTrack,
+                                                    EditorState.selectedClip).length
+               : 0
+    }
+    property bool fitPresets: true
+    property var menuPreset: null
+
     height: column.height
     implicitHeight: column.height
 
@@ -83,6 +99,7 @@ Item {
         function onSelectionChanged() { root.clipDataRevision++; root.refreshFields() }
         function onSelectedClipDataChanged() { root.clipDataRevision++; root.refreshFields() }
         function onTracksChanged() { root.clipDataRevision++; root.refreshFields() }
+        function onKeyframePresetsChanged() { root.presetRevision++ }
     }
 
     Component.onCompleted: refreshFields()
@@ -315,5 +332,155 @@ Item {
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSizeXs
         }
+
+        // ----- Keyframe presets: save a clip's keyframes, reuse them anywhere ---------------
+        Column {
+            id: presetSection
+            visible: root.hasSelection
+            width: parent.width
+            spacing: Theme.spacingMd
+
+            ThemedLabel {
+                text: qsTr("Keyframe presets")
+                tone: "default"
+                size: "sm"
+                SearchAnchor {
+                    searchId: "animation-keyframe-presets"
+                    title: qsTr("Keyframe presets")
+                    keywords: "keyframes save reuse copy paste prefab template animation library"
+                }
+            }
+
+            ThemedLabel {
+                width: parent.width
+                text: qsTr("Save this clip's keyframes, then apply them to any clip in any project. A preset starts at the playhead.")
+            }
+
+            ThemedButton {
+                width: parent.width
+                text: qsTr("Save keyframes as preset…")
+                variant: "secondary"
+                enabled: root.animatedCount > 0
+                onClicked: saveDialog.openFor(EditorState.selectedTrack, EditorState.selectedClip,
+                                              qsTr("My animation %1").arg(root.keyframePresets.length + 1))
+            }
+
+            ThemedLabel {
+                visible: root.animatedCount === 0
+                width: parent.width
+                text: qsTr("This clip has no keyframes to save yet.")
+            }
+
+            ThemedSwitch {
+                visible: root.keyframePresets.length > 0
+                width: parent.width
+                text: qsTr("Fit to this clip")
+                tooltip: qsTr("On: move and size relative to where this clip already is, scaled to its size. Off: use the exact values the preset was saved with.")
+                checked: root.fitPresets
+                onToggled: root.fitPresets = checked
+            }
+
+            Repeater {
+                model: root.keyframePresets
+                delegate: Item {
+                    id: presetRow
+                    required property var modelData
+                    width: presetSection.width
+                    height: Math.max(presetText.implicitHeight, applyChip.height)
+
+                    Column {
+                        id: presetText
+                        anchors.left: parent.left
+                        anchors.right: applyChip.left
+                        anchors.rightMargin: Theme.spacingSm
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        ThemedLabel {
+                            width: parent.width
+                            text: presetRow.modelData.label
+                            tone: "default"
+                            size: "sm"
+                            wrapMode: Text.NoWrap
+                            elide: Text.ElideRight
+                        }
+                        ThemedLabel {
+                            width: parent.width
+                            text: qsTr("%n propert(ies)", "", presetRow.modelData.properties.length)
+                                  + " · " + qsTr("%1 s").arg(Number(presetRow.modelData.duration).toFixed(2))
+                            wrapMode: Text.NoWrap
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    ThemedChip {
+                        id: applyChip
+                        anchors.right: moreButton.left
+                        anchors.rightMargin: Theme.spacingXs
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Apply")
+                        tooltip: presetRow.modelData.properties.join(", ")
+                        onClicked: EditorState.applyKeyframePreset(EditorState.selectedTrack,
+                                                                   EditorState.selectedClip,
+                                                                   presetRow.modelData.id,
+                                                                   root.fitPresets,
+                                                                   EditorState.playheadSeconds)
+                    }
+
+                    IconButton {
+                        id: moreButton
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        glyph: Theme.icons.ellipsis
+                        tooltip: qsTr("More")
+                        onClicked: {
+                            root.menuPreset = presetRow.modelData
+                            presetMenu.popup(moreButton, 0, moreButton.height)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ThemedContextMenu {
+        id: presetMenu
+        implicitWidth: 160
+
+        ThemedMenuItem {
+            text: qsTr("Rename…")
+            onTriggered: renameDialog.openWith(qsTr("Rename keyframe preset"), root.menuPreset.label)
+        }
+
+        ThemedMenuItem {
+            text: qsTr("Delete")
+            icon.name: Theme.icons.trash
+            onTriggered: deleteDialog.open()
+        }
+    }
+
+    NameDialog {
+        id: renameDialog
+        onSubmitted: (name) => EditorState.renameKeyframePreset(root.menuPreset.id, name)
+    }
+
+    ThemedDialog {
+        id: deleteDialog
+        title: qsTr("Delete keyframe preset?")
+        acceptText: qsTr("Delete")
+        acceptVariant: "destructive"
+        preferredWidth: Theme.dialogWidthSm
+        onAccepted: EditorState.deleteKeyframePreset(root.menuPreset.id)
+
+        contentItem: ThemedLabel {
+            text: root.menuPreset
+                  ? qsTr("“%1” will be removed from every project. Keyframes already applied to clips stay.").arg(root.menuPreset.label)
+                  : ""
+            tone: "default"
+            size: "sm"
+        }
+    }
+
+    KeyframePresetSaveDialog {
+        id: saveDialog
     }
 }

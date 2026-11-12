@@ -381,6 +381,7 @@ private slots:
     void compositorRendersCompositeClip();
     void audioMixerPlaysCompositeClip();
     void adjustmentEffectContrastCatalogEntry();
+    void ditherEffectQuantizesToPalette();
     void effectPresetStableIds();
     void effectParamTypesMatchShaderUniforms();
     void loudnessMatchesTheStandard();
@@ -9743,6 +9744,74 @@ void EngineTest::adjustmentEffectContrastCatalogEntry()
     QVERIFY(!out.isNull());
     const QRgb pixel = out.pixel(32, 32);
     QVERIFY(qRed(pixel) > 180 || qGreen(pixel) > 180 || qBlue(pixel) > 180);
+}
+
+// Dither reduces a grey ramp to pure black and white (Two colours, Bayer 4x4), and the share of
+// white pixels follows the input brightness, which is what makes it a dither and not a threshold.
+void EngineTest::ditherEffectQuantizesToPalette()
+{
+    const EffectPresetEntry *def = effectDefForId(QStringLiteral("stylize.dither"));
+    QVERIFY(def);
+    QVERIFY(def->isGpu);
+    QVERIFY(def->gpu.valid);
+    QCOMPARE(def->meta.category, QStringLiteral("retro"));
+
+    if (!GpuEffectExecutor::instance().isAvailable())
+        QSKIP("OpenGL offscreen context unavailable");
+
+    // Eight 8-px wide bands from dark to light grey.
+    QImage ramp(64, 16, QImage::Format_RGBA8888);
+    for (int x = 0; x < ramp.width(); ++x) {
+        const int grey = 16 + (x / 8) * 32;
+        for (int y = 0; y < ramp.height(); ++y)
+            ramp.setPixelColor(x, y, QColor(grey, grey, grey));
+    }
+
+    drift::Effect effect;
+    effect.catalogId = def->meta.id;
+    effect.parameters.insert(QStringLiteral("pattern"), 1.0); // Bayer 4x4
+    effect.parameters.insert(QStringLiteral("palette"), 2.0); // Two colours (black / white)
+
+    const QImage out = EffectProcessor::applyEffects(ramp, {effect}).convertToFormat(QImage::Format_RGBA8888);
+    QVERIFY(!out.isNull());
+    QCOMPARE(out.size(), ramp.size());
+
+    int previousWhite = -1;
+    for (int band = 0; band < 8; ++band) {
+        int white = 0;
+        for (int x = band * 8; x < band * 8 + 8; ++x)
+            for (int y = 0; y < out.height(); ++y) {
+                const QColor c = out.pixelColor(x, y);
+                QVERIFY2((c.red() < 8 && c.green() < 8 && c.blue() < 8)
+                             || (c.red() > 247 && c.green() > 247 && c.blue() > 247),
+                         qPrintable(QStringLiteral("not black or white at %1,%2: %3")
+                                        .arg(x).arg(y).arg(c.name())));
+                if (c.red() > 128)
+                    ++white;
+            }
+        QVERIFY2(white >= previousWhite, "brighter input must not dither to fewer white pixels");
+        previousWhite = white;
+    }
+    // A mid grey band is a real mix of both colours, not a solid threshold.
+    int midWhite = 0;
+    for (int x = 32; x < 40; ++x)
+        for (int y = 0; y < 16; ++y)
+            midWhite += out.pixelColor(x, y).red() > 128 ? 1 : 0;
+    QVERIFY(midWhite > 16 && midWhite < 112);
+
+    // Colour levels = 2 leaves every channel at 0 or 255.
+    effect.parameters.insert(QStringLiteral("palette"), 0.0);
+    effect.parameters.insert(QStringLiteral("levels"), 2.0);
+    QImage colour(32, 32, QImage::Format_RGBA8888);
+    colour.fill(QColor(200, 90, 40));
+    const QImage outColour =
+        EffectProcessor::applyEffects(colour, {effect}).convertToFormat(QImage::Format_RGBA8888);
+    for (int y = 0; y < outColour.height(); ++y)
+        for (int x = 0; x < outColour.width(); ++x) {
+            const QColor c = outColour.pixelColor(x, y);
+            for (int v : {c.red(), c.green(), c.blue()})
+                QVERIFY(v < 8 || v > 247);
+        }
 }
 
 void EngineTest::effectPresetStableIds()

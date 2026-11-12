@@ -93,6 +93,7 @@
 #include "engine/tracking/MotionTracking.h"
 #include "core/project/clip/Clip.h"
 #include "core/animation/EasingPresetStore.h"
+#include "core/animation/KeyframePresetStore.h"
 #include "core/effects/EffectStackStore.h"
 #include "core/interchange/premiere/MogrtReader.h"
 #include "core/interchange/KdenliveReader.h"
@@ -336,6 +337,7 @@ private slots:
     void segmentEasingFunctionRoundTrip();
     void segmentEasingMirrorsLinkedPosition();
     void easingPresetStoreSaveRenameDelete();
+    void keyframePresetSaveApplyAcrossClips();
     void effectParamKeyframes();
     void keyframeRowsListEffectParamsAndChannels();
     void keyframeStaticChannelsReadTheStoredValue();
@@ -8654,6 +8656,114 @@ void EditorStateTest::easingPresetStoreSaveRenameDelete()
 
     QFile::remove(drift::EasingPresetStore::storePath());
     drift::EasingPresetStore::instance().reload();
+    QCoreApplication::setOrganizationName(org);
+    QCoreApplication::setApplicationName(app);
+    QStandardPaths::setTestModeEnabled(false);
+}
+
+// A clip's keyframes saved as a preset land on another clip at the playhead: exactly as saved, or
+// fitted to where the other clip sits. An effect the preset animates comes along with it. The
+// library is a file outside the project, so it survives a reload.
+void EditorStateTest::keyframePresetSaveApplyAcrossClips()
+{
+    const QString org = QCoreApplication::organizationName();
+    const QString app = QCoreApplication::applicationName();
+    QStandardPaths::setTestModeEnabled(true);
+    QCoreApplication::setOrganizationName(QStringLiteral("DriftTest"));
+    QCoreApplication::setApplicationName(QStringLiteral("DriftTestKeyframePresets"));
+    QFile::remove(drift::KeyframePresetStore::storePath());
+    drift::KeyframePresetStore::instance().reload();
+
+    AssetLibrary library;
+    AppController state(&library);
+    state.setPositionLinked(false);
+    QSignalSpy changed(&state, &AppController::keyframePresetsChanged);
+
+    const auto locate = [&state](const QString &id, int *t, int *c) {
+        return drift::mcpdetail::findClipById(*state.project(), id, t, c);
+    };
+
+    // Source: slides right by 200 px and fades in over one second, with brightness animated.
+    state.addTextClip(QStringLiteral("Slide"), 0.0);
+    const QString sourceId =
+        state.project()->tracks().at(state.selectedTrack()).clips.at(state.selectedClip()).id;
+    int t = -1;
+    int c = -1;
+    QVERIFY(locate(sourceId, &t, &c));
+    const double sourceX = state.propertyValueAt(t, c, QStringLiteral("x"), 0.0, 0.0);
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("x"), 0.0, sourceX));
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("x"), 1.0, sourceX + 200.0));
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("opacity"), 0.0, 0.0));
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("opacity"), 1.0, 1.0));
+    state.addEffect(t, c, QStringLiteral("adjust.brightness"));
+    QVERIFY(locate(sourceId, &t, &c));
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("fx.0.brightness"), 0.0, 0.0));
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("fx.0.brightness"), 1.0, 0.5));
+
+    const QVariantList candidates = state.keyframePresetCandidates(t, c);
+    QStringList candidateProps;
+    for (const QVariant &v : candidates)
+        candidateProps.append(v.toMap().value(QStringLiteral("prop")).toString());
+    QVERIFY(candidateProps.contains(QStringLiteral("x")));
+    QVERIFY(candidateProps.contains(QStringLiteral("opacity")));
+    QVERIFY(candidateProps.contains(QStringLiteral("fx.0.brightness")));
+
+    const QString presetId = state.saveKeyframePreset(t, c, QStringLiteral("Slide in"));
+    QVERIFY(!presetId.isEmpty());
+    QCOMPARE(changed.count(), 1);
+    QVariantList presets = state.keyframePresets();
+    QCOMPARE(presets.size(), 1);
+    QCOMPARE(presets.first().toMap().value(QStringLiteral("label")).toString(), QStringLiteral("Slide in"));
+    QCOMPARE(presets.first().toMap().value(QStringLiteral("properties")).toList().size(), 3);
+    QVERIFY(qAbs(presets.first().toMap().value(QStringLiteral("duration")).toDouble() - 1.0) < 1e-6);
+
+    // Saved to disk: a fresh read of the library still has it.
+    drift::KeyframePresetStore::instance().reload();
+    QCOMPARE(state.keyframePresets().size(), 1);
+
+    // Target: a clip later in the timeline, with no keyframes and no effects.
+    state.addTextClip(QStringLiteral("Slide"), 10.0);
+    const QString targetId =
+        state.project()->tracks().at(state.selectedTrack()).clips.at(state.selectedClip()).id;
+    QVERIFY(locate(targetId, &t, &c));
+    const double clipStart = drift::usToSeconds(state.project()->tracks().at(t).clips.at(c).timelineStart);
+    QVERIFY(drift::usToSeconds(state.project()->tracks().at(t).clips.at(c).timelineDuration) >= 1.5);
+    const double targetX = state.propertyValueAt(t, c, QStringLiteral("x"), clipStart, 0.0) + 300.0;
+    // Move the target off the source's spot, so "fit" and "exact" give different answers.
+    QVERIFY(state.setClipKeyframe(t, c, QStringLiteral("x"), clipStart, targetX));
+
+    // Exact: the same values, starting at the playhead (half a second into the clip).
+    QVERIFY(state.applyKeyframePreset(t, c, presetId, /*fitToClip=*/false, clipStart + 0.5));
+    QVERIFY(locate(targetId, &t, &c));
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("x"), clipStart + 0.5, 0.0) - sourceX) < 1e-6);
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("x"), clipStart + 1.5, 0.0) - (sourceX + 200.0)) < 1e-6);
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("opacity"), clipStart + 0.5, -1.0)) < 1e-6);
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("opacity"), clipStart + 1.5, -1.0) - 1.0) < 1e-6);
+    // The brightness effect was added to the target, animated.
+    QVERIFY(state.clipAnimatedProperties(t, c).contains(QStringLiteral("fx.0.brightness")));
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("fx.0.brightness"), clipStart + 1.5, -1.0) - 0.5) < 1e-6);
+
+    // One undo takes all of it back, the added effect included.
+    state.undo();
+    QVERIFY(locate(targetId, &t, &c));
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("x"), clipStart + 1.5, 0.0) - targetX) < 1e-6);
+    QVERIFY(!state.clipAnimatedProperties(t, c).contains(QStringLiteral("fx.0.brightness")));
+
+    // Fit to clip: the slide starts from where the target already is (same size, so same distance).
+    QVERIFY(state.applyKeyframePreset(t, c, presetId, /*fitToClip=*/true, clipStart));
+    QVERIFY(locate(targetId, &t, &c));
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("x"), clipStart, 0.0) - targetX) < 1e-6);
+    QVERIFY(qAbs(state.propertyValueAt(t, c, QStringLiteral("x"), clipStart + 1.0, 0.0) - (targetX + 200.0)) < 1e-6);
+
+    // Rename and delete; a deleted preset can no longer be applied.
+    QVERIFY(state.renameKeyframePreset(presetId, QStringLiteral("Slide")));
+    QCOMPARE(state.keyframePresets().first().toMap().value(QStringLiteral("label")).toString(), QStringLiteral("Slide"));
+    QVERIFY(state.deleteKeyframePreset(presetId));
+    QCOMPARE(state.keyframePresets().size(), 0);
+    QVERIFY(!state.applyKeyframePreset(t, c, presetId, true, clipStart));
+
+    QFile::remove(drift::KeyframePresetStore::storePath());
+    drift::KeyframePresetStore::instance().reload();
     QCoreApplication::setOrganizationName(org);
     QCoreApplication::setApplicationName(app);
     QStandardPaths::setTestModeEnabled(false);

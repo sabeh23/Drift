@@ -479,6 +479,16 @@
       ]
     },
     {
+      "id": "animation-keyframe-presets",
+      "target": "panel:properties.animation#animation-keyframe-presets",
+      "context": "AnimationInspector",
+      "source": "Keyframe presets",
+      "keywords": "keyframes save reuse copy paste prefab template animation library",
+      "needs": [
+        "animatable"
+      ]
+    },
+    {
       "id": "audiofx-settings",
       "target": "panel:properties.audioEffects#audiofx-settings",
       "context": "AudioEffectsInspector",
