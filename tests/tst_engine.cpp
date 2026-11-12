@@ -9812,6 +9812,21 @@ void EngineTest::ditherEffectQuantizesToPalette()
             for (int v : {c.red(), c.green(), c.blue()})
                 QVERIFY(v < 8 || v > 247);
         }
+
+    // A black overlay faded by its alpha (fog, a vignette) dithers through its transparency: every
+    // pixel ends up fully see-through or fully opaque, with a real mix of both at half alpha.
+    QImage fog(32, 32, QImage::Format_RGBA8888);
+    fog.fill(QColor(0, 0, 0, 128));
+    const QImage outFog =
+        EffectProcessor::applyEffects(fog, {effect}).convertToFormat(QImage::Format_RGBA8888);
+    int opaque = 0;
+    for (int y = 0; y < outFog.height(); ++y)
+        for (int x = 0; x < outFog.width(); ++x) {
+            const int a = outFog.pixelColor(x, y).alpha();
+            QVERIFY2(a < 8 || a > 247, qPrintable(QStringLiteral("alpha %1 at %2,%3").arg(a).arg(x).arg(y)));
+            opaque += a > 128 ? 1 : 0;
+        }
+    QVERIFY(opaque > 256 && opaque < 768);
 }
 
 void EngineTest::effectPresetStableIds()

@@ -126,6 +126,22 @@
       "type": "bool",
       "defaultValue": false,
       "group": "Tone"
+    },
+    {
+      "identifier": "ditherAlpha",
+      "displayName": "Dither transparency",
+      "type": "bool",
+      "defaultValue": true,
+      "group": "Dither"
+    },
+    {
+      "identifier": "alphaLevels",
+      "displayName": "Transparency levels",
+      "type": "int",
+      "minValue": 2,
+      "maxValue": 16,
+      "defaultValue": 2,
+      "group": "Dither"
     }
   ],
   "pipeline": {

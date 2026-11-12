@@ -10,6 +10,7 @@ uniform float pattern; uniform float palette; uniform float levels; uniform floa
 uniform float spread; uniform float strength;
 uniform vec3 darkColor; uniform vec3 lightColor;
 uniform float brightness; uniform float contrast; uniform float animated;
+uniform float ditherAlpha; uniform float alphaLevels;
 
 // Fixed palettes, back to back: Game Boy (0, 4 entries), PICO-8 (4, 16), CGA (20, 4).
 const vec3 PALETTES[24] = vec3[24](
@@ -118,6 +119,12 @@ void main()
     c = clamp((c - 0.5) * contrast + 0.5 + brightness, 0.0, 1.0);
 
     float t = threshold(cell);
+
+    // Transparency dithers too, so a black overlay faded by its alpha (fog, a vignette, a shadow)
+    // breaks into dots instead of staying a smooth fade over whatever is underneath.
+    if (ditherAlpha > 0.5)
+        alpha = quantize(vec3(alpha), alphaLevels, t).x;
+
     int pal = int(palette + 0.5);
     vec3 outColor;
     if (pal == 0) {
