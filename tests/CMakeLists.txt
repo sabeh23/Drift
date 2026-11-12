@@ -249,6 +249,7 @@ qt_add_executable(tst_mcp
     ../src/app/editor/appcontroller/AppControllerComposite.cpp
     ../src/app/editor/appcontroller/AppControllerVector.cpp
     ../src/app/editor/appcontroller/AppControllerKeyframes.cpp
+    ../src/app/editor/appcontroller/AppControllerKeyframePresets.cpp
     ../src/app/editor/appcontroller/AppControllerEffects.cpp
     ../src/app/editor/appcontroller/AppControllerTracks.cpp
     ../src/app/editor/appcontroller/AppControllerProject.cpp
