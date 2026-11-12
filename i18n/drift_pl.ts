@@ -3593,6 +3593,22 @@
         <translation>Odwracanie wideo…</translation>
     </message>
     <message>
+        <source>Enable pixelated scaling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disable pixelated scaling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clip scales without smoothing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clip scales smoothly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Flip changed</source>
         <translation>Zmieniono odbicie</translation>
     </message>
@@ -26099,6 +26115,14 @@ Jeśli odtwarzanie się zacina, spróbuj innego.</translation>
     <message>
         <source>Flip V</source>
         <translation>Odbij w pionie</translation>
+    </message>
+    <message>
+        <source>Pixelated (no smoothing)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scale this clip with nearest-neighbour sampling instead of smoothing, so pixel art keeps hard, crisp pixels at any size.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Reset position &amp; size</source>

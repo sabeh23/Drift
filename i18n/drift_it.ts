@@ -3587,6 +3587,22 @@
         <translation>Inversione video in corso…</translation>
     </message>
     <message>
+        <source>Enable pixelated scaling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disable pixelated scaling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clip scales without smoothing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clip scales smoothly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Flip changed</source>
         <translation>Capovolgimento modificato</translation>
     </message>
@@ -26014,6 +26030,14 @@ Se la riproduzione va a scatti, prova un&apos;altra opzione.</translation>
     <message>
         <source>Flip V</source>
         <translation>Capovolgi vert.</translation>
+    </message>
+    <message>
+        <source>Pixelated (no smoothing)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scale this clip with nearest-neighbour sampling instead of smoothing, so pixel art keeps hard, crisp pixels at any size.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Reset position &amp; size</source>
