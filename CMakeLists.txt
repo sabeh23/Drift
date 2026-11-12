@@ -345,7 +345,8 @@ option(DRIFT_BUNDLE_CORE_PACKAGES_ONLY
     "Ship only the core effect/transition packages in the drift app (the rest are addons)" OFF)
 set(DRIFT_CORE_EFFECTS
     color_grade film_grain chromatic_aberration adjust_brightness adjust_contrast adjust_gamma
-    adjust_hue adjust_saturation adjust_temperature gaussian_blur bloom_glow halation stylize_vignette)
+    adjust_hue adjust_saturation adjust_temperature gaussian_blur bloom_glow halation stylize_vignette
+    stylize_dither)
 set(DRIFT_CORE_TRANSITIONS crossfade dip dip_white)
 set(DRIFT_CORE_AUDIO_EFFECTS "")
 set(DRIFT_CORE_EFFECT_TEMPLATES "")
@@ -1167,6 +1168,8 @@ qt_add_executable(drift
     src/app/editor/LayoutStore.cpp
     src/app/editor/WorkspaceStore.h
     src/app/editor/WorkspaceStore.cpp
+    src/app/editor/ModManager.h
+    src/app/editor/ModManager.cpp
     src/app/editor/SearchIndex.h
     src/app/editor/SearchIndex.cpp
     src/app/platform/FileDialogs.h
@@ -2193,6 +2196,8 @@ qt_add_qml_module(drift
         src/qml/components/timeline/ClipFilmstripTile.qml
         src/qml/components/controls/IconGlyph.qml
         src/qml/components/controls/ThemeSlot.qml
+        src/qml/components/controls/ModSlot.qml
+        src/qml/components/controls/ModRow.qml
         src/qml/components/controls/IconButton.qml
         src/qml/components/shell/PanelFrame.qml
         src/qml/components/shell/PanelSplitHandle.qml
@@ -2582,6 +2587,7 @@ qt_add_qml_module(drift
         src/qml/components/shell/workspaces/designer/DesignerWorkspaceList.qml
         src/qml/components/shell/workspaces/designer/WorkspaceDesigner.qml
         src/qml/components/shell/SettingsWorkspacesPage.qml
+        src/qml/components/shell/SettingsModsPage.qml
         src/qml/components/shell/EditorHeaderSettingsButton.qml
         src/qml/components/shell/AppSettingsMenu.qml
         src/qml/components/shell/EditorHeaderVideoButton.qml

@@ -78,4 +78,13 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
     }
+
+    // User mods drawing over this panel slot. Above the panels, which are re-parented into
+    // `body` at runtime and would otherwise cover it.
+    ModSlot {
+        hook: "panel"
+        host: root
+        anchors.fill: parent
+        z: 100
+    }
 }

@@ -1556,6 +1556,14 @@ ApplicationWindow {
             id: workspace
             onDownloadsRequested: window.openMarketplace("downloads")
         }
+
+        // User mods that work on the editor as a whole.
+        ModSlot {
+            hook: "app"
+            host: window
+            anchors.fill: parent
+            z: 100
+        }
     }
 
     // Startup only: replaces a fresh empty project when "Reopen last project on

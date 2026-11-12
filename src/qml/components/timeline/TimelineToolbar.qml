@@ -271,5 +271,12 @@ Item {
             active: EditorState.preferences.timelineOverviewVisible
             onClicked: EditorState.preferences.timelineOverviewVisible = !EditorState.preferences.timelineOverviewVisible
         }
+
+        // Buttons added by user mods.
+        ModRow {
+            hook: "timelineToolbar"
+            host: toolbar
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 }

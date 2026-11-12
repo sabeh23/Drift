@@ -311,6 +311,19 @@ Item {
         }
     }
 
+    // User mods drawing over the clip (keyframe markers, badges...). Not even an Item per clip
+    // unless a mod asks for the hook: a long timeline has thousands of these.
+    Loader {
+        anchors.fill: parent
+        active: (Mods.revision, Mods.hasHook("timelineClip"))
+        sourceComponent: Component {
+            ModSlot {
+                hook: "timelineClip"
+                host: clipItem
+            }
+        }
+    }
+
     // Stands in for the rect the Menu used to be parented to, so it resolves the same parent item
     // and clamps against the same bounds.
     Loader {

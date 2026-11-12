@@ -29,6 +29,7 @@
 #include "app/StartupSplash.h"
 #include "app/editor/LayoutStore.h"
 #include "app/editor/WorkspaceStore.h"
+#include "app/editor/ModManager.h"
 #include "app/editor/SearchIndex.h"
 #include "app/online/downloads/DownloadBridges.h"
 #include "app/online/downloads/DownloadCenter.h"
@@ -798,6 +799,7 @@ int main(int argc, char *argv[])
     static UpdateChecker updateChecker;
     static LayoutStore layoutStore;
     static WorkspaceStore workspaceStore;
+    static ModManager modManager;
     static SearchIndex searchIndex;
     static ProceduralEditorController proceduralEditor(&editorState);
     static drift::Haptics haptics;
@@ -826,6 +828,7 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance("Drift", 1, 0, "Updates", &updateChecker);
     qmlRegisterSingletonInstance("Drift", 1, 0, "LayoutMemory", &layoutStore);
     qmlRegisterSingletonInstance("Drift", 1, 0, "Workspaces", &workspaceStore);
+    qmlRegisterSingletonInstance("Drift", 1, 0, "Mods", &modManager);
     searchIndex.setSources(&editorState, &workspaceStore, &addonManager, ThemeManager::shared());
     qmlRegisterSingletonInstance("Drift", 1, 0, "SearchIndex", &searchIndex);
     qmlRegisterSingletonInstance("Drift", 1, 0, "Haptics", &haptics);
@@ -870,6 +873,9 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
+    // A mod file edited on disk has to be compiled again, not served from the engine's cache.
+    QObject::connect(&modManager, &ModManager::componentCacheStale, &engine,
+                     [&engine] { engine.clearComponentCache(); });
     static CachedNetworkAccessManagerFactory networkFactory;
     engine.setNetworkAccessManagerFactory(&networkFactory);
     QObject::connect(editorState.preferences(), &PreferencesController::uiLanguageChanged,

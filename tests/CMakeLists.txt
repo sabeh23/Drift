@@ -444,6 +444,11 @@ qt_add_resources(tst_workspacestore "workspace_presets"
 )
 add_test(NAME WorkspaceStore COMMAND tst_workspacestore)
 
+qt_add_executable(tst_modmanager tst_modmanager.cpp ../src/app/editor/ModManager.cpp ../src/app/editor/ModManager.h)
+target_include_directories(tst_modmanager PRIVATE ../src)
+target_link_libraries(tst_modmanager PRIVATE Qt6::Test Qt6::Core)
+add_test(NAME ModManager COMMAND tst_modmanager)
+
 qt_add_executable(tst_searchindex tst_searchindex.cpp ../src/app/editor/SearchIndex.cpp)
 target_include_directories(tst_searchindex PRIVATE ../src)
 target_link_libraries(tst_searchindex PRIVATE Qt6::Test Qt6::Core)

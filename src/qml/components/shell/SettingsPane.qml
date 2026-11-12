@@ -17,7 +17,7 @@ Item {
     property string currentPage: "general"
     // The phone shell has no workspaces, timeline toolbar or keyboard to configure.
     property bool mobile: false
-    readonly property var mobileHiddenPages: ["workspaces", "toolbar", "keymap"]
+    readonly property var mobileHiddenPages: ["workspaces", "mods", "toolbar", "keymap"]
     readonly property string query: searchField.text.trim().toLowerCase()
     readonly property bool narrow: width < 640
     readonly property real sidebarWidth: 220
@@ -27,6 +27,7 @@ Item {
         { id: "general", title: qsTr("General"), keywords: "language locale startup autosave recovery cache backup" },
         { id: "appearance", title: qsTr("Appearance"), keywords: "theme dark light color workspace layout translucency" },
         { id: "workspaces", title: qsTr("Workspaces"), keywords: "workspace layout panel window monitor screen dock preset" },
+        { id: "mods", title: qsTr("Mods"), keywords: "mod mods addon plugin extension custom script qml" },
         { id: "timeline", title: qsTr("Timeline"), keywords: "scroll wheel horizontal vertical crossfade transition overview minimap" },
         { id: "toolbar", title: qsTr("Timeline toolbar"), keywords: "toolbar buttons customize" },
         { id: "keymap", title: qsTr("Keyboard shortcuts"), keywords: "keymap keys hotkeys bindings" },
@@ -41,7 +42,7 @@ Item {
         (page) => !(mobile && mobileHiddenPages.includes(page.id)))
 
     readonly property bool searchHasMatches: {
-        for (const slot of [generalSlot, appearanceSlot, workspacesSlot, timelineSlot, toolbarSlot, keymapSlot,
+        for (const slot of [generalSlot, appearanceSlot, workspacesSlot, modsSlot, timelineSlot, toolbarSlot, keymapSlot,
                             previewSlot, performanceSlot, audioSlot, aiSlot, networkSlot, aboutSlot]) {
             if (slot.hasMatches)
                 return true
@@ -208,6 +209,13 @@ Item {
                 pageId: "workspaces"
                 allowed: !root.mobile
                 sourceComponent: SettingsWorkspacesPage { query: root.query }
+            }
+
+            PageSlot {
+                id: modsSlot
+                pageId: "mods"
+                allowed: !root.mobile
+                sourceComponent: SettingsModsPage { query: root.query }
             }
 
             PageSlot {

@@ -14474,6 +14474,20 @@
     </message>
 </context>
 <context>
+    <name>ModRow</name>
+    <message>
+        <source>could not be loaded. Check the file for errors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ModSlot</name>
+    <message>
+        <source>could not be loaded. Check the file for errors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Model3DInspector</name>
     <message>
         <source>Replace 3D Model</source>
@@ -18933,6 +18947,49 @@ If playback stutters, try another.</source>
     </message>
 </context>
 <context>
+    <name>SettingsModsPage</name>
+    <message>
+        <source>Mods</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mods add to Drift&apos;s interface without reinstalling it. Each one is a folder inside your mods folder. They run with the same access to your computer as Drift itself, so only switch on mods you trust.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mods folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No mods yet. Put a mod&apos;s folder into the mods folder and it will show up here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>by %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nothing to load: no hook files found.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Problem: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SettingsNetworkPage</name>
     <message>
         <source>Network</source>
@@ -19003,6 +19060,10 @@ If playback stutters, try another.</source>
     </message>
     <message>
         <source>Workspaces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mods</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
