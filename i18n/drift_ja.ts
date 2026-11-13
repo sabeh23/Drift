@@ -19503,6 +19503,14 @@ If playback stutters, try another.</source>
         <translation>編集</translation>
     </message>
     <message>
+        <source>Smooth new keyframes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New keyframes ease in and out smoothly, like Blender&apos;s default. Off makes them linear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Auto-crossfade overlapping clips</source>
         <translation>重なり合うクリップを自動クロスフェード</translation>
     </message>

@@ -287,6 +287,7 @@ PreferencesController::PreferencesController(QObject *parent)
         settings.value(QStringLiteral("preview/mediaCodecZeroCopy"), false).toBool();
     m_invertTimelineScroll = settings.value(QStringLiteral("timeline/invertScroll"), false).toBool();
     m_autoCrossfadeOverlaps = settings.value(QStringLiteral("timeline/autoCrossfadeOverlaps"), true).toBool();
+    m_smoothNewKeyframes = settings.value(QStringLiteral("keyframes/smoothNew"), true).toBool();
     m_autoSelectUnderPlayhead = settings.value(QStringLiteral("timeline/autoSelectUnderPlayhead"), false).toBool();
     m_networkProxyMode = settings.value(QStringLiteral("network/proxyMode"), QStringLiteral("system")).toString();
     m_networkProxyHost = settings.value(QStringLiteral("network/proxyHost")).toString();
@@ -650,6 +651,16 @@ void PreferencesController::setAutoCrossfadeOverlaps(bool enabled)
     QSettings settings;
     settings.setValue(QStringLiteral("timeline/autoCrossfadeOverlaps"), m_autoCrossfadeOverlaps);
     emit autoCrossfadeOverlapsChanged();
+}
+
+void PreferencesController::setSmoothNewKeyframes(bool enabled)
+{
+    if (m_smoothNewKeyframes == enabled)
+        return;
+    m_smoothNewKeyframes = enabled;
+    QSettings settings;
+    settings.setValue(QStringLiteral("keyframes/smoothNew"), m_smoothNewKeyframes);
+    emit smoothNewKeyframesChanged();
 }
 
 void PreferencesController::setAutoSelectUnderPlayhead(bool enabled)

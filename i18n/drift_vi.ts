@@ -19503,6 +19503,14 @@ Nếu phát lại bị giật, hãy thử cách khác.</translation>
         <translation>Chỉnh sửa</translation>
     </message>
     <message>
+        <source>Smooth new keyframes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New keyframes ease in and out smoothly, like Blender&apos;s default. Off makes them linear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Auto-crossfade overlapping clips</source>
         <translation>Tự động hòa mờ chéo các clip chồng lấp</translation>
     </message>

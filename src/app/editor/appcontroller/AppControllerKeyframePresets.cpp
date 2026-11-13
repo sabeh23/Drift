@@ -3,6 +3,7 @@
 // is the part that knows how a clip's properties are addressed and where their keys live.
 
 #include "app/editor/appcontroller/AppControllerInternal.h"
+#include "app/editor/AppControllerDetail.h"
 #include "core/animation/KeyframePresetStore.h"
 #include "core/effects/Effect.h"
 #include "core/effects/Mask.h"
@@ -565,4 +566,17 @@ bool AppController::deleteKeyframePreset(const QString &id)
         return false;
     emit keyframePresetsChanged();
     return true;
+}
+
+bool AppController::smoothNewKeyframes() const
+{
+    return drift::appdetail::smoothNewKeyframes();
+}
+
+void AppController::setSmoothNewKeyframes(bool enabled)
+{
+    if (drift::appdetail::smoothNewKeyframes() == enabled)
+        return;
+    drift::appdetail::smoothNewKeyframes() = enabled;
+    emit smoothNewKeyframesChanged();
 }

@@ -19578,6 +19578,14 @@ Se a reprodução engasgar, experimente outro.</translation>
         <translation>Edição</translation>
     </message>
     <message>
+        <source>Smooth new keyframes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New keyframes ease in and out smoothly, like Blender&apos;s default. Off makes them linear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Auto-crossfade overlapping clips</source>
         <translation>Criar crossfade automaticamente em clipes sobrepostos</translation>
     </message>

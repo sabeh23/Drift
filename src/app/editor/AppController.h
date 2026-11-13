@@ -251,6 +251,9 @@ class AppController : public QObject
     // follows this until the user picks one; that override lives on PreferencesController.
     Q_PROPERTY(bool projectPortrait READ projectPortrait NOTIFY tracksChanged)
     Q_PROPERTY(bool autoKeyEnabled READ autoKeyEnabled WRITE setAutoKeyEnabled NOTIFY autoKeyEnabledChanged)
+    // New keyframes from edits ease smoothly (Blender's auto-clamped handles) instead of linearly.
+    Q_PROPERTY(bool smoothNewKeyframes READ smoothNewKeyframes WRITE setSmoothNewKeyframes
+                   NOTIFY smoothNewKeyframesChanged)
     Q_PROPERTY(bool positionLinked READ positionLinked WRITE setPositionLinked NOTIFY positionLinkedChanged)
     Q_PROPERTY(bool sizeLinked READ sizeLinked WRITE setSizeLinked NOTIFY sizeLinkedChanged)
     Q_PROPERTY(double masterVolume READ masterVolume
@@ -474,6 +477,8 @@ public:
     bool mediaGridMode() const { return m_mediaViewMode == QLatin1String("grid"); }
     QString mediaViewMode() const { return m_mediaViewMode; }
     bool autoKeyEnabled() const { return m_autoKeyEnabled; }
+    bool smoothNewKeyframes() const;
+    void setSmoothNewKeyframes(bool enabled);
     bool positionLinked() const { return m_positionLinked; }
     void setPositionLinked(bool linked);
     bool sizeLinked() const { return m_sizeLinked; }
@@ -1922,6 +1927,7 @@ signals:
     void mediaGridModeChanged();
     void mediaViewModeChanged();
     void autoKeyEnabledChanged();
+    void smoothNewKeyframesChanged();
     void positionLinkedChanged();
     void sizeLinkedChanged();
     void masterVolumeChanged();

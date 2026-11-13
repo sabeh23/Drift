@@ -19577,6 +19577,14 @@ If playback stutters, try another.</source>
         <translation>সম্পাদনা</translation>
     </message>
     <message>
+        <source>Smooth new keyframes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New keyframes ease in and out smoothly, like Blender&apos;s default. Off makes them linear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Auto-crossfade overlapping clips</source>
         <translation>ওভারল্যাপ হওয়া ক্লিপে স্বয়ংক্রিয় ক্রসফেড</translation>
     </message>

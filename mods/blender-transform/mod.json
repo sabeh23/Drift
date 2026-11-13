@@ -1,0 +1,6 @@
+{
+  "name": "Blender transform keys",
+  "description": "Hover the preview and press G to move, R to rotate (R twice for 3D trackball), S to scale. Then X or Y to lock an axis, type a number for an exact value, click or Enter to confirm, right-click or Esc to cancel.",
+  "author": "Claude",
+  "version": "1.0"
+}

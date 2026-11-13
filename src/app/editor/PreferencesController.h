@@ -93,6 +93,9 @@ class PreferencesController : public QObject
                    NOTIFY invertTimelineScrollChanged)
     Q_PROPERTY(bool autoCrossfadeOverlaps READ autoCrossfadeOverlaps WRITE setAutoCrossfadeOverlaps
                    NOTIFY autoCrossfadeOverlapsChanged)
+    // New keyframes ease smoothly (Blender-style auto-clamped handles). The editor window applies it.
+    Q_PROPERTY(bool smoothNewKeyframes READ smoothNewKeyframes WRITE setSmoothNewKeyframes
+                   NOTIFY smoothNewKeyframesChanged)
     // Timeline toolbar auto-select: while stopped, moving the playhead selects the clip under it.
     Q_PROPERTY(bool autoSelectUnderPlayhead READ autoSelectUnderPlayhead WRITE setAutoSelectUnderPlayhead
                    NOTIFY autoSelectUnderPlayheadChanged)
@@ -227,6 +230,8 @@ public:
     bool invertTimelineScroll() const { return m_invertTimelineScroll; }
     void setInvertTimelineScroll(bool enabled);
     bool autoCrossfadeOverlaps() const { return m_autoCrossfadeOverlaps; }
+    bool smoothNewKeyframes() const { return m_smoothNewKeyframes; }
+    void setSmoothNewKeyframes(bool enabled);
     void setAutoCrossfadeOverlaps(bool enabled);
     bool autoSelectUnderPlayhead() const { return m_autoSelectUnderPlayhead; }
     void setAutoSelectUnderPlayhead(bool enabled);
@@ -350,6 +355,7 @@ signals:
     void uiGraphicsApiChanged();
     void invertTimelineScrollChanged();
     void autoCrossfadeOverlapsChanged();
+    void smoothNewKeyframesChanged();
     void autoSelectUnderPlayheadChanged();
     void networkProxyChanged();
     void autosaveIntervalSecondsChanged();
@@ -392,6 +398,7 @@ private:
     QString m_uiGraphicsApi;
     bool m_invertTimelineScroll = false;
     bool m_autoCrossfadeOverlaps = true;
+    bool m_smoothNewKeyframes = true;
     bool m_autoSelectUnderPlayhead = false;
     QString m_networkProxyMode = QStringLiteral("system");
     QString m_networkProxyHost;

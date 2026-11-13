@@ -23,6 +23,9 @@ double clipTransformValue(const drift::KeyframeTrack<double> &track, drift::Time
                           double defaultValue);
 bool writeKeyframeValue(drift::KeyframeTrack<double> &track, drift::TimeUs relative, double value,
                         bool autoKey, bool force);
+// When on, keys written by edits get Blender-style auto-clamped handles (smooth ease). Off by
+// default; the editor turns it on from the "Smooth new keyframes" preference.
+bool &smoothNewKeyframes();
 bool clipAcceptsPreviewTransform(const drift::Clip &clip);
 void setClipLayoutPixels(drift::Clip &clip, double x, double y, double w, double h);
 QVariantMap maskToMap(const drift::Mask &m, drift::TimeUs timelineStart = 0);

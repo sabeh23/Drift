@@ -409,6 +409,12 @@ namespace drift::appdetail {
 // key at/near the playhead is required. Empty tracks get a constant key at 0
 // when auto-key is off so static layout edits still work; a track with a single
 // key retargets that key from anywhere so single-keyframe clips still edit freely.
+bool &smoothNewKeyframes()
+{
+    static bool enabled = false;
+    return enabled;
+}
+
 bool writeKeyframeValue(drift::KeyframeTrack<double> &track, drift::TimeUs relative, double value,
                         bool autoKey, bool force)
 {
@@ -423,7 +429,10 @@ bool writeKeyframeValue(drift::KeyframeTrack<double> &track, drift::TimeUs relat
         // it. MCP replies round times to 3 decimals, so a caller that reads a key's time back and
         // writes to it is up to 500 us off — enough to leave two keys where the caller meant one.
         const drift::TimeUs existing = track.nearestKeyframe(relative, kKeyframeWriteSnapUs);
-        track.setKeyframe(existing >= 0 ? existing : relative, value);
+        if (smoothNewKeyframes())
+            track.setKeyframeAutoClamped(existing >= 0 ? existing : relative, value);
+        else
+            track.setKeyframe(existing >= 0 ? existing : relative, value);
         return true;
     }
     if (track.isEmpty()) {
@@ -437,7 +446,10 @@ bool writeKeyframeValue(drift::KeyframeTrack<double> &track, drift::TimeUs relat
     const drift::TimeUs nearest = track.nearestKeyframe(relative, kKeyframeToleranceUs);
     if (nearest < 0)
         return false;
-    track.setKeyframe(nearest, value);
+    if (smoothNewKeyframes())
+        track.setKeyframeAutoClamped(nearest, value);
+    else
+        track.setKeyframe(nearest, value);
     return true;
 }
 

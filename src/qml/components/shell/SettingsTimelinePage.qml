@@ -39,6 +39,19 @@ SettingsPage {
     }
 
     SettingsRow {
+        title: qsTr("Smooth new keyframes")
+        searchId: "timeline-smooth-new-keyframes"
+        description: qsTr("New keyframes ease in and out smoothly, like Blender's default. Off makes them linear.")
+        keywords: "keyframe easing ease smooth bezier linear blender auto clamped interpolation"
+        query: page.query
+
+        ThemedSwitch {
+            checked: EditorState.preferences.smoothNewKeyframes
+            onToggled: EditorState.preferences.smoothNewKeyframes = checked
+        }
+    }
+
+    SettingsRow {
         title: qsTr("Auto-crossfade overlapping clips")
         searchId: "timeline-auto-crossfade"
         description: qsTr("When a move creates an overlap with a neighbouring clip on the same track, add a crossfade across it.")

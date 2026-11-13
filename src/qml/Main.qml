@@ -1557,6 +1557,14 @@ ApplicationWindow {
             onDownloadsRequested: window.openMarketplace("downloads")
         }
 
+        // The preference drives the engine switch here, in the editor window only, so headless
+        // instances and tests keep the plain linear default.
+        Binding {
+            target: EditorState
+            property: "smoothNewKeyframes"
+            value: EditorState.preferences.smoothNewKeyframes
+        }
+
         // User mods that work on the editor as a whole.
         ModSlot {
             hook: "app"

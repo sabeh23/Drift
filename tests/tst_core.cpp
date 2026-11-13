@@ -90,6 +90,7 @@ private slots:
     void sourceFramingRoundTrip();
     void clipPose3dRoundTrip();
     void clipPixelatedRoundTrip();
+    void keyframeAutoClampedEasesLikeBlender();
     void projectSerializationRoundTrip();
     void binFolderSerializationRoundTrip();
     void compositeSequenceRoundTrip();
@@ -662,6 +663,33 @@ void CoreTest::sourceFramingRoundTrip()
     QVERIFY(!QJsonDocument(plain.toJson()).toJson().contains("sourceFrame"));
     QCOMPARE(drift::sourceFrameFromJson({}), QRectF(0, 0, 1, 1));
     QCOMPARE(drift::normalizedSourceFrame(-1, 4, 2, 0.5), QRectF(0, 0.5, 1, 0.5));
+}
+
+// "Smooth new keyframes": Blender's auto-clamped handles. Two keys ease in and out, a peak never
+// overshoots, a key between two others gets a slope, and a hand-shaped key is left alone.
+void CoreTest::keyframeAutoClampedEasesLikeBlender()
+{
+    drift::KeyframeTrack<double> track;
+    track.setKeyframeAutoClamped(0, 0.0);
+    track.setKeyframeAutoClamped(1000000, 100.0);
+    QCOMPARE(track.evaluateAt(500000), 50.0);
+    QVERIFY(track.evaluateAt(250000) < 20.0); // eases out of the first key (linear: 25)
+
+    track.setKeyframeAutoClamped(2000000, 50.0);
+    QVERIFY(track.isAutoClamped(1000000));
+    QCOMPARE(track.keyframes().value(1000000).outDy, 0.0); // the peak is flat
+    for (int i = 0; i <= 200; ++i)
+        QVERIFY(track.evaluateAt(i * 10000) <= 100.0 + 1e-9);
+
+    track.setKeyframeAutoClamped(1000000, 25.0); // now between 0 and 50
+    QVERIFY(track.isAutoClamped(1000000));
+    QVERIFY(track.keyframes().value(1000000).outDy > 0.0);
+
+    drift::Keyframe<double> *first = track.keyframeRef(0);
+    first->outDx = 300000;
+    first->outDy = 40.0;
+    track.setKeyframeAutoClamped(500000, 10.0);
+    QCOMPARE(track.keyframes().value(0).outDy, 40.0);
 }
 
 void CoreTest::clipPixelatedRoundTrip()

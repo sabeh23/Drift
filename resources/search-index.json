@@ -1554,6 +1554,15 @@
       "descriptionSource": "What the mouse wheel moves on the timeline. Hold Shift for the other direction; middle-click drag also pans."
     },
     {
+      "id": "timeline-smooth-new-keyframes",
+      "target": "settings:timeline#timeline-smooth-new-keyframes",
+      "context": "SettingsTimelinePage",
+      "source": "Smooth new keyframes",
+      "keywords": "keyframe easing ease smooth bezier linear blender auto clamped interpolation",
+      "needs": [],
+      "descriptionSource": "New keyframes ease in and out smoothly, like Blender's default. Off makes them linear."
+    },
+    {
       "id": "timeline-auto-crossfade",
       "target": "settings:timeline#timeline-auto-crossfade",
       "context": "SettingsTimelinePage",

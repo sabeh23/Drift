@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <cmath>
+
 #include "core/animation/Easing.h"
 #include "core/base/Bezier.h"
 #include "core/base/Time.h"
@@ -214,6 +217,68 @@ public:
         }
     }
 
+    // Blender's default "auto clamped" handles: the curve eases out of the first key and into the
+    // last, flattens on every peak and dip (so it never overshoots a key's value), and passes
+    // smoothly through the keys in between. Handles reach a third of the way along each segment.
+    void setAutoClamped(TimeUs time)
+    {
+        auto it = m_values.find(time);
+        if (it == m_values.end())
+            return;
+        const AutoHandles h = autoClampedHandles(it);
+        it->hold = false;
+        it->fn = EasingFn::None;
+        it->corner = false;
+        it->inDx = h.inDx;
+        it->inDy = h.inDy;
+        it->outDx = h.outDx;
+        it->outDy = h.outDy;
+    }
+
+    // Whether the key's handles are exactly what setAutoClamped would give it now, which is how a
+    // smoothed key is told apart from one the user shaped by hand.
+    bool isAutoClamped(TimeUs time) const
+    {
+        auto it = m_values.constFind(time);
+        if (it == m_values.constEnd() || it->hold || it->fn != EasingFn::None || it->corner)
+            return false;
+        const AutoHandles h = autoClampedHandles(it);
+        const auto same = [](double a, double b) {
+            return std::abs(a - b) <= 1e-6 * std::max({1.0, std::abs(a), std::abs(b)});
+        };
+        return same(it->inDx, h.inDx) && same(it->inDy, h.inDy) && same(it->outDx, h.outDx)
+               && same(it->outDy, h.outDy);
+    }
+
+    // Writes a value the way an edit in the editor does with smoothing on: a new key gets
+    // auto-clamped handles, and the keys on either side that were still auto-clamped are
+    // re-smoothed, since their slope depends on this key. Hand-shaped keys are left alone.
+    void setKeyframeAutoClamped(TimeUs time, const T &value)
+    {
+        const bool existed = m_values.contains(time);
+        QList<TimeUs> keep;
+        if (existed && isAutoClamped(time))
+            keep.append(time);
+        // The neighbours as they will be once `time` holds a key.
+        auto after = m_values.lowerBound(time);
+        if (after != m_values.end() && after.key() == time)
+            ++after;
+        if (after != m_values.end() && isAutoClamped(after.key()))
+            keep.append(after.key());
+        auto before = m_values.lowerBound(time);
+        if (before != m_values.begin()) {
+            --before;
+            if (isAutoClamped(before.key()))
+                keep.append(before.key());
+        }
+
+        setKeyframe(time, value);
+        if (!existed)
+            keep.append(time);
+        for (TimeUs t : keep)
+            setAutoClamped(t);
+    }
+
     void setSmoothAll()
     {
         const QList<TimeUs> times = m_values.keys();
@@ -420,6 +485,44 @@ public:
     void detachSharedData() { m_values.detach(); }
 
 private:
+    struct AutoHandles
+    {
+        double inDx = 0.0, inDy = 0.0, outDx = 0.0, outDy = 0.0;
+    };
+
+    template <typename It>
+    AutoHandles autoClampedHandles(It it) const
+    {
+        AutoHandles h;
+        const bool hasPrev = it != m_values.cbegin() && it != m_values.begin();
+        auto next = std::next(it);
+        const bool hasNext = next != m_values.cend() && next != m_values.end();
+        const double t = static_cast<double>(it.key());
+        if (hasPrev)
+            h.inDx = -(t - static_cast<double>(std::prev(it).key())) / 3.0;
+        if (hasNext)
+            h.outDx = (static_cast<double>(next.key()) - t) / 3.0;
+        // Ends and single keys stay flat: the curve eases in and out.
+        if (!hasPrev || !hasNext)
+            return h;
+
+        const double tp = static_cast<double>(std::prev(it).key());
+        const double tn = static_cast<double>(next.key());
+        const double vp = static_cast<double>(std::prev(it)->value);
+        const double v = static_cast<double>(it->value);
+        const double vn = static_cast<double>(next->value);
+        // A peak or a dip stays flat, so the curve never overshoots it.
+        if ((v >= vp && v >= vn) || (v <= vp && v <= vn))
+            return h;
+        double slope = (vn - vp) / (tn - tp);
+        // Clamp so neither handle reaches past the neighbouring key's value.
+        const double limit = std::min(3.0 * std::abs(v - vp) / (t - tp), 3.0 * std::abs(vn - v) / (tn - t));
+        slope = std::clamp(slope, -limit, limit);
+        h.inDy = slope * h.inDx;
+        h.outDy = slope * h.outDx;
+        return h;
+    }
+
     static double lerp(double a, double b, double t) { return a + (b - a) * t; }
 
     static float lerp(float a, float b, double t)

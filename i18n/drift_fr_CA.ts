@@ -19579,6 +19579,14 @@ En cas de saccades à la lecture, essayez un autre mode.</translation>
         <translation>Montage</translation>
     </message>
     <message>
+        <source>Smooth new keyframes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New keyframes ease in and out smoothly, like Blender&apos;s default. Off makes them linear.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Auto-crossfade overlapping clips</source>
         <translation>Fondu enchaîné automatique des clips qui se chevauchent</translation>
     </message>
