@@ -1,0 +1,6 @@
+{
+  "name": "Blender timeline navigation",
+  "description": "In the timeline, Ctrl + middle-mouse drag zooms around the pointer like Blender (drag right to zoom in). Middle-mouse drag alone still pans.",
+  "author": "Claude",
+  "version": "1.0"
+}

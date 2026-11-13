@@ -23,6 +23,10 @@ Item {
     readonly property real pxPerSecond: root.host ? root.host.panel.pxPerSecond : 1
     readonly property real clipStart: root.host ? root.host.effectiveStart : 0
     readonly property real clipDuration: root.host ? root.host.effectiveDuration : 0
+    readonly property real fps: Math.max(1, EditorState.projectFile.projectFps())
+    function toFrame(seconds) {
+        return Math.round(seconds * root.fps) / root.fps
+    }
 
     // Selected diamond's time (timeline seconds) on this clip; -1 for none.
     property real selected: -1
@@ -155,11 +159,32 @@ Item {
                     const minDx = -marker.px
                     const maxDx = root.clipDuration * root.pxPerSecond - marker.px
                     dx = Math.max(minDx, Math.min(maxDx, dx))
+                    // Land on whole frames so keys never sit between two of them; Ctrl also
+                    // pulls the key onto the playhead or a neighbouring key when it is close.
+                    const from = marker.modelData.seconds
+                    let target = from + dx / root.pxPerSecond
+                    if (mouse.modifiers & Qt.ControlModifier) {
+                        const others = [EditorState.playheadSeconds, root.clipStart,
+                                        root.clipStart + root.clipDuration]
+                        for (let i = 0; i < root.keys.length; ++i)
+                            if (Math.abs(root.keys[i].seconds - from) > 0.0005)
+                                others.push(root.keys[i].seconds)
+                        let best = 10 / root.pxPerSecond
+                        for (let i = 0; i < others.length; ++i)
+                            if (Math.abs(others[i] - target) < best) {
+                                best = Math.abs(others[i] - target)
+                                target = others[i]
+                            }
+                    }
+                    target = root.toFrame(target)
+                    target = Math.max(root.clipStart, Math.min(root.clipStart + root.clipDuration, target))
+                    const dt = target - from
+                    if (Math.abs(dt * root.pxPerSecond - marker.dragDx) < 0.01 && marker.dragging)
+                        return
                     marker.dragging = true
-                    marker.dragDx = dx
+                    marker.dragDx = dt * root.pxPerSecond
                     EditorState.keyframes.previewMoveKeys(root.trackIndex, root.clipIndex,
-                                                          root.refsFor(marker.modelData),
-                                                          dx / root.pxPerSecond)
+                                                          root.refsFor(marker.modelData), dt)
                 }
 
                 onReleased: (mouse) => {

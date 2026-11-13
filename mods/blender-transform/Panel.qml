@@ -9,6 +9,7 @@ import Drift
 //   S            scale             then X / Y: stretch only that axis
 //   typing       an exact amount: pixels (G), degrees (R), factor (S); Backspace edits, - flips
 //   click/Enter  confirm           right-click/Esc: cancel
+//   Shift        hold for fine control      Ctrl: hold to snap (10 px, 5°, 0.1x)
 //
 // One instance sits over every panel slot; only the one showing the preview does anything. The
 // keys only work while the pointer is over the preview, and never while typing into a field.
@@ -75,6 +76,10 @@ Item {
     property real lastAngle: 0
     property bool turnedOn3d: false
     property string hud: ""
+    property point rawLast: Qt.point(0, 0)
+    property bool fine: false
+    property bool snapping: false
+    property var focusBefore: null
 
     readonly property bool active: root.mode !== ""
     readonly property int track: EditorState.selectedTrack
@@ -87,6 +92,23 @@ Item {
     function isTyping() {
         const f = root.Window.activeFocusItem
         return !!f && f !== catcher && (f.cursorPosition !== undefined || f.selectedText !== undefined)
+    }
+
+    function inPopup(item) {
+        for (let p = item; p; p = p.parent)
+            if (p.toString().indexOf("PopupItem") >= 0 || p.toString().indexOf("Overlay") >= 0)
+                return true
+        return false
+    }
+    function giveFocusBack() {
+        if (!catcher.activeFocus)
+            return
+        const back = root.focusBefore
+        root.focusBefore = null
+        if (back && back.visible)
+            back.forceActiveFocus()
+        else
+            catcher.focus = false
     }
 
     function canStart() {
@@ -109,6 +131,9 @@ Item {
         }
         root.pointer0 = hover.point.scenePosition
         root.pointer = root.pointer0
+        root.rawLast = root.pointer0
+        root.fine = false
+        root.snapping = false
         root.axis = ""
         root.typed = ""
         root.rotUnwrap = 0
@@ -144,6 +169,8 @@ Item {
         root.mode = ""
         root.start = null
         root.hud = ""
+        if (!hover.hovered)
+            root.giveFocusBack()
     }
 
     function centerScene() {
@@ -153,6 +180,26 @@ Item {
     function angleOf(p) {
         const c = root.start ? root.centerScene() : Qt.point(0, 0)
         return Math.atan2(p.y - c.y, p.x - c.x) * 180 / Math.PI
+    }
+
+    // Pointer moved: Shift scales the motion down tenfold from here on, like Blender.
+    function moved(raw, modifiers) {
+        const f = (modifiers & Qt.ShiftModifier) ? 0.1 : 1
+        root.fine = f < 1
+        root.snapping = !!(modifiers & Qt.ControlModifier)
+        root.pointer = Qt.point(root.pointer.x + (raw.x - root.rawLast.x) * f,
+                                root.pointer.y + (raw.y - root.rawLast.y) * f)
+        const a = root.angleOf(raw)
+        let step = a - root.lastAngle
+        if (step > 180) step -= 360
+        if (step < -180) step += 360
+        root.rotUnwrap += step * f
+        root.lastAngle = a
+        root.rawLast = raw
+        root.update()
+    }
+    function snap(v, step) {
+        return root.snapping ? Math.round(v / step) * step : v
     }
 
     function typedNumber() {
@@ -179,7 +226,8 @@ Item {
         const c0 = root.toCanvas(root.pointer0.x, root.pointer0.y)
         const c1 = root.toCanvas(root.pointer.x, root.pointer.y)
         const typedTxt = root.typed !== "" ? "  [" + root.typed + "]" : ""
-        const axisTxt = root.axis !== "" ? "  along " + root.axis.toUpperCase() : ""
+        const axisTxt = (root.axis !== "" ? "  along " + root.axis.toUpperCase() : "")
+                        + (root.snapping ? "  snap" : "") + (root.fine ? "  fine" : "")
 
         if (root.mode === "move") {
             let dx = c1.x - c0.x
@@ -190,13 +238,19 @@ Item {
             }
             if (root.axis === "x") dy = 0
             if (root.axis === "y") dx = 0
+            if (root.snapping) {
+                dx = root.snap(s.x + dx, 10) - s.x
+                dy = root.snap(s.y + dy, 10) - s.y
+                if (root.axis === "x") dy = 0
+                if (root.axis === "y") dx = 0
+            }
             EditorState.previewSetClipPosition(root.track, root.clip, s.x + dx, s.y + dy)
             root.hud = "Move   X: " + Math.round(dx) + "   Y: " + Math.round(dy) + axisTxt + typedTxt
         } else if (root.mode === "scale") {
             const c = root.centerScene()
             const d0 = Math.max(1, Math.hypot(root.pointer0.x - c.x, root.pointer0.y - c.y))
             const d1 = Math.hypot(root.pointer.x - c.x, root.pointer.y - c.y)
-            const k = !isNaN(n) ? n : d1 / d0
+            const k = !isNaN(n) ? n : Math.max(0.01, root.snap(d1 / d0, 0.1))
             const kx = root.axis === "y" ? 1 : k
             const ky = root.axis === "x" ? 1 : k
             const w = Math.max(1, s.w * kx)
@@ -209,13 +263,7 @@ Item {
                 EditorState.previewSetClipRect(root.track, root.clip, x, y, w, h)
             root.hud = "Scale   " + k.toFixed(3) + axisTxt + typedTxt
         } else if (root.mode === "rotate" && root.axis === "") {
-            const a = root.angleOf(root.pointer)
-            let step = a - root.lastAngle
-            if (step > 180) step -= 360
-            if (step < -180) step += 360
-            root.rotUnwrap += step
-            root.lastAngle = a
-            const deg = !isNaN(n) ? n : root.rotUnwrap
+            const deg = !isNaN(n) ? n : root.snap(s.rot + root.rotUnwrap, 5) - s.rot
             EditorState.previewSetClipRotation(root.track, root.clip, s.rot + deg)
             root.hud = "Rotate   " + deg.toFixed(1) + "°" + typedTxt
         } else if (root.mode === "rotate") {
@@ -223,19 +271,19 @@ Item {
             const sens = 0.5
             const t = EditorState.playheadSeconds
             if (root.axis === "x") {
-                const deg = !isNaN(n) ? n : -(root.pointer.y - root.pointer0.y) * sens
+                const deg = !isNaN(n) ? n : root.snap(s.rx + (root.pointer.y - root.pointer0.y) * sens, 5) - s.rx
                 EditorState.previewSetClipKeyframe(root.track, root.clip, "rotationX", t, s.rx + deg)
                 root.hud = "Rotate X (3D)   " + deg.toFixed(1) + "°" + typedTxt
             } else {
-                const deg = !isNaN(n) ? n : (root.pointer.x - root.pointer0.x) * sens
+                const deg = !isNaN(n) ? n : root.snap(s.ry - (root.pointer.x - root.pointer0.x) * sens, 5) - s.ry
                 EditorState.previewSetClipKeyframe(root.track, root.clip, "rotationY", t, s.ry + deg)
                 root.hud = "Rotate Y (3D)   " + deg.toFixed(1) + "°" + typedTxt
             }
         } else if (root.mode === "trackball") {
             const sens = 0.5
             const t = EditorState.playheadSeconds
-            const dxDeg = (root.pointer.x - root.pointer0.x) * sens
-            const dyDeg = -(root.pointer.y - root.pointer0.y) * sens
+            const dxDeg = root.snap(s.ry - (root.pointer.x - root.pointer0.x) * sens, 5) - s.ry
+            const dyDeg = root.snap(s.rx + (root.pointer.y - root.pointer0.y) * sens, 5) - s.rx
             EditorState.previewSetClipKeyframe(root.track, root.clip, "rotationX", t, s.rx + dyDeg)
             EditorState.previewSetClipKeyframe(root.track, root.clip, "rotationY", t, s.ry + dxDeg)
             root.hud = "Trackball (3D)   X: " + dyDeg.toFixed(1) + "°   Y: " + dxDeg.toFixed(1) + "°"
@@ -246,14 +294,17 @@ Item {
     HoverHandler {
         id: hover
         enabled: root.isPreview
+        // Borrow keyboard focus only while the pointer is over the preview, and hand it back
+        // to whatever had it when the pointer leaves, so the rest of the editor keeps its keys.
         onHoveredChanged: {
-            if (hovered && !root.isTyping())
-                catcher.forceActiveFocus()
-        }
-        onPointChanged: {
-            if (root.active) {
-                root.pointer = hover.point.scenePosition
-                root.update()
+            if (hovered) {
+                const f = root.Window.activeFocusItem
+                if (f !== catcher && !root.isTyping() && !root.inPopup(f)) {
+                    root.focusBefore = f
+                    catcher.forceActiveFocus()
+                }
+            } else if (!root.active) {
+                root.giveFocusBack()
             }
         }
     }
@@ -265,16 +316,23 @@ Item {
         focus: false
 
         function claims(event) {
-            if (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
-                return false
             if (root.active)
                 return true
+            if (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier | Qt.ShiftModifier))
+                return false
             if (!hover.hovered || !root.canStart())
                 return false
             return event.key === Qt.Key_G || event.key === Qt.Key_R || event.key === Qt.Key_S
         }
 
         Keys.onShortcutOverride: (event) => { if (catcher.claims(event)) event.accepted = true }
+        Keys.onReleased: (event) => {
+            if (root.active && event.key === Qt.Key_Control) {
+                event.accepted = true
+                root.snapping = false
+                root.update()
+            }
+        }
         Keys.onPressed: (event) => {
             if (!catcher.claims(event))
                 return
@@ -282,6 +340,11 @@ Item {
             if (event.isAutoRepeat)
                 return
             const k = event.key
+            if (root.active && (k === Qt.Key_Control || k === Qt.Key_Shift)) {
+                root.snapping = !!(event.modifiers & Qt.ControlModifier)
+                root.update()
+                return
+            }
             if (!root.active) {
                 if (k === Qt.Key_G) root.begin("move")
                 else if (k === Qt.Key_R) root.begin("rotate")
@@ -322,10 +385,7 @@ Item {
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: root.mode === "move" ? Qt.SizeAllCursor : Qt.CrossCursor
-        onPositionChanged: (mouse) => {
-            root.pointer = mapToItem(null, mouse.x, mouse.y)
-            root.update()
-        }
+        onPositionChanged: (mouse) => root.moved(mapToItem(null, mouse.x, mouse.y), mouse.modifiers)
         onPressed: (mouse) => root.finish(mouse.button === Qt.LeftButton)
     }
 
