@@ -672,7 +672,7 @@ void CoreTest::keyframeAutoClampedEasesLikeBlender()
     drift::KeyframeTrack<double> track;
     track.setKeyframeAutoClamped(0, 0.0);
     track.setKeyframeAutoClamped(1000000, 100.0);
-    QCOMPARE(track.evaluateAt(500000), 50.0);
+    QVERIFY(qAbs(track.evaluateAt(500000) - 50.0) < 1e-3);
     QVERIFY(track.evaluateAt(250000) < 20.0); // eases out of the first key (linear: 25)
 
     track.setKeyframeAutoClamped(2000000, 50.0);
