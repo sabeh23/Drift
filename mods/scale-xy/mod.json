@@ -1,0 +1,6 @@
+{
+  "name": "Scale X / Y",
+  "description": "A button in the timeline toolbar that opens Scale X and Scale Y sliders for the selected clip, so it can be stretched on one axis. Respects Auto keyframes like the Transform panel.",
+  "author": "Claude",
+  "version": "1.0"
+}

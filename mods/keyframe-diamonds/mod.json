@@ -1,6 +1,6 @@
 {
   "name": "Keyframe diamonds",
-  "description": "Shows a diamond on each timeline clip wherever it has a keyframe. Click one to jump the playhead there.",
+  "description": "Shows a diamond on each timeline clip wherever it has keyframes. Click to jump there, drag to move, Delete or right-click to delete, copy or paste.",
   "author": "Claude",
-  "version": "1.0"
+  "version": "1.1"
 }
